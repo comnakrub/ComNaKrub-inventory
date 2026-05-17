@@ -285,6 +285,8 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
   const [payNote, setPayNote] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const [deleting, setDeleting] = useState(false)
+
   // edit state
   const [editing, setEditing] = useState(false)
   const [draftName, setDraftName] = useState(set.customerName)
@@ -366,6 +368,22 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
   const totalPaid = set.payments.reduce((sum, p) => sum + p.amount, 0)
   const remaining = set.totalPrice - totalPaid
 
+  const handleDelete = async () => {
+    const isStockAffected = set.status === 'contracted' || set.status === 'paid'
+    const msg = isStockAffected
+      ? 'ลบชุดนี้? ระบบจะคืนจำนวนสินค้ากลับคลังโดยอัตโนมัติ ยืนยัน?'
+      : 'ลบชุดนี้? การกระทำนี้ไม่สามารถย้อนกลับได้'
+    if (!confirm(msg)) return
+    setDeleting(true)
+    try {
+      await fetch(`/api/sets/${set.id}`, { method: 'DELETE' })
+      onUpdated()
+      onClose()
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const handleStatusChange = async (status: SetStatus) => {
     await fetch(`/api/sets/${set.id}/status`, {
       method: 'PATCH',
@@ -415,6 +433,12 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
               <button onClick={() => setEditing(true)}
                 className="px-2.5 py-1 border rounded text-xs hover:bg-accent transition-colors">
                 แก้ไข
+              </button>
+            )}
+            {!editing && (
+              <button onClick={handleDelete} disabled={deleting}
+                className="px-2.5 py-1 border border-destructive text-destructive rounded text-xs hover:bg-destructive/10 transition-colors disabled:opacity-50">
+                {deleting ? '...' : 'ลบ'}
               </button>
             )}
             <button onClick={onClose} className="p-1 hover:bg-accent rounded transition-colors"><X size={18} /></button>

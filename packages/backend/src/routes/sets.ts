@@ -186,6 +186,34 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
   }
 })
 
+// DELETE /api/sets/:id
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10)
+    const set = await prisma.customerSet.findUnique({
+      where: { id },
+      include: { items: true },
+    })
+    if (!set) return res.status(404).json({ error: 'Set not found' })
+
+    await prisma.$transaction(async (tx) => {
+      if (set.status === 'contracted' || set.status === 'paid') {
+        for (const item of set.items) {
+          await tx.part.update({
+            where: { id: item.partId },
+            data: { quantity: { increment: item.quantity } },
+          })
+        }
+      }
+      await tx.customerSet.delete({ where: { id } })
+    })
+
+    res.status(204).end()
+  } catch {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // POST /api/sets/:id/payments
 router.post('/:id/payments', async (req: Request, res: Response) => {
   try {

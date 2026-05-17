@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+*.db
+*.db-journal
+.env
+.env.local
+deploy.env
+packages/backend/prisma/dev.db
+packages/backend/prisma/prod.db

@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Blue/White palette — matched to ComNaKrub logo */
+    --background: 218 50% 98%;        /* off-white with blue tint */
+    --foreground: 221 46% 18%;        /* dark navy */
+
+    --card: 0 0% 100%;
+    --card-foreground: 221 46% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 46% 18%;
+
+    --primary: 218 70% 50%;           /* cornflower blue — logo headphone color */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 218 45% 94%;
+    --secondary-foreground: 221 46% 22%;
+
+    --muted: 218 42% 95%;
+    --muted-foreground: 218 22% 52%;
+
+    --accent: 218 48% 92%;
+    --accent-foreground: 221 46% 22%;
+
+    --destructive: 0 84% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 218 36% 88%;
+    --input: 218 36% 88%;
+    --ring: 218 70% 50%;
+    --radius: 0.6rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Segoe UI', 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}

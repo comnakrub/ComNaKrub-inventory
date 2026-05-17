@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name, LastWriteTime)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\src\\\\routes\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\prisma\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\pages\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\lib\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\types\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\natha\\Documents\\ComNaKrub\\packages\\backend\\src"
+    ]
+  }
+}

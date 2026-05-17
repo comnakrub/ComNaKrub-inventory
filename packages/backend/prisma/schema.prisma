@@ -1,0 +1,64 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Part {
+  id        Int      @id @default(autoincrement())
+  name      String
+  category  String
+  brand     String   @default("")
+  model     String   @default("")
+  quantity  Int      @default(0)
+  costPrice Float    @default(0)
+  sellPrice Float    @default(0)
+  barcode   String?  @unique
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  setItems SetItem[]
+}
+
+model CustomerSet {
+  id           Int       @id @default(autoincrement())
+  customerName String
+  customerPhone String   @default("")
+  notes        String    @default("")
+  totalPrice   Float     @default(0)
+  status       String    @default("draft")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  items    SetItem[]
+  payments Payment[]
+}
+
+model SetItem {
+  id          Int         @id @default(autoincrement())
+  setId       Int
+  partId      Int
+  quantity    Int         @default(1)
+  unitPrice   Float
+  createdAt   DateTime    @default(now())
+
+  set  CustomerSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  part Part        @relation(fields: [partId], references: [id])
+}
+
+model Payment {
+  id        Int         @id @default(autoincrement())
+  setId     Int
+  amount    Float
+  method    String      @default("cash")
+  note      String      @default("")
+  paidAt    DateTime    @default(now())
+
+  set CustomerSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+}

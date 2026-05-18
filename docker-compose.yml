@@ -28,7 +28,7 @@ services:
     container_name: comnakrub-frontend
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8766}:80"
+      - "${APP_PORT:-8765}:80"
     depends_on:
       - backend
     networks:

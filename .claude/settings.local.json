@@ -3,7 +3,32 @@
     "allow": [
       "Bash(Get-ChildItem \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object Name, LastWriteTime)",
-      "Bash(mkdir -p \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\src\\\\routes\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\prisma\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\pages\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\lib\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\types\")"
+      "Bash(mkdir -p \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\src\\\\routes\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\backend\\\\prisma\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\pages\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\lib\" \"C:\\\\Users\\\\natha\\\\Documents\\\\ComNaKrub\\\\packages\\\\frontend\\\\src\\\\types\")",
+      "Bash(Test-NetConnection -ComputerName 192.168.99.105 -Port 22)",
+      "Bash(Select-Object ComputerName, RemotePort, TcpTestSucceeded)",
+      "Bash(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no na@192.168.99.105 \"echo 'SSH Connection Successful!' && uname -a && whoami\")",
+      "Bash(ls -la ~/.ssh/ 2>/dev/null | head -20 || echo \"No ~/.ssh directory found\")",
+      "Read(//c/Users/na/.ssh/**)",
+      "Bash(pacman -S sshpass --noconfirm)",
+      "Bash(python3 -c \"import paramiko; print\\('paramiko available'\\)\")",
+      "Bash(ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N \"\" -C \"na@192.168.99.105\")",
+      "Bash(ssh -o ConnectTimeout=5 na@192.168.99.105 \"echo '✓ SSH Connection Successful!' && whoami && pwd && echo '' && echo 'System Info:' && uname -a\")",
+      "Bash(ssh -o ConnectTimeout=5 na@192.168.99.105 \"ls -lah /share/Container/ 2>/dev/null | grep -E 'comnakrub|^d|^total' || echo 'Checking directory...'\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && ls -lah && echo '' && echo 'Docker Containers:' && docker ps --format 'table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}' 2>/dev/null || echo 'Docker not available'\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "PowerShell(docker --version)",
+      "PowerShell(docker-compose --version)",
+      "Bash(scp -O -P 22 docker-compose.yml na@192.168.99.105:/share/Container/comnakrub/docker-compose.yml)",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose down && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 3 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
+      "Bash(ssh na@192.168.99.105 \"netstat -tlnp 2>/dev/null | grep -E '8765|8766' || ss -tlnp 2>/dev/null | grep -E '8765|8766' || echo 'Could not check ports'\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=8765 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d --force-recreate && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
+      "Bash(ssh na@192.168.99.105 \"lsof -i :8765 2>/dev/null || fuser 8765/tcp 2>/dev/null || echo 'Cannot determine process'\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker system prune -f && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker network prune -f\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=9999 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=8765 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
+      "Bash(curl -s http://192.168.99.105:8766/api/health)",
+      "Bash(curl -s http://192.168.99.105:8766/)"
     ],
     "additionalDirectories": [
       "C:\\Users\\natha\\Documents\\ComNaKrub\\packages\\backend\\src"

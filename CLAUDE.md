@@ -6,14 +6,14 @@
 
 - **Frontend:** `packages/frontend/` — React 18 + Vite + TypeScript + Tailwind + Radix UI
 - **Backend:** `packages/backend/` — Express + TypeScript + Prisma + SQLite
-- **Deploy target:** QNAP TS-853DU-RP ที่ `192.168.99.105:8765` via Docker Compose
+- **Deploy target:** QNAP TS-853DU-RP ที่ `192.168.99.105:8766` via Docker Compose
 
 ## Architecture Decisions
 
 - **SQLite** เลือกเพราะ deploy บน QNAP NAS — ไม่ต้องการ database server แยก
 - **Soft delete** สำหรับ Part ใช้ `isActive: false` ไม่ได้ลบจริง เพื่อรักษา historical data ใน SetItem
 - **Monorepo** ใช้ npm workspaces — รัน script จาก root ได้เลย
-- **Port 8765** ใช้บน QNAP เพื่อหลีกเลี่ยง conflict กับ service อื่น
+- **Port 8766** ใช้บน QNAP — port 8765 ถูก lircd (IR remote) ของ QNAP ใช้อยู่
 
 ## Key File Locations
 

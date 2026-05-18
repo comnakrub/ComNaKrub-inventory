@@ -28,7 +28,8 @@
       "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=9999 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
       "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=8765 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
       "Bash(curl -s http://192.168.99.105:8766/api/health)",
-      "Bash(curl -s http://192.168.99.105:8766/)"
+      "Bash(curl -s http://192.168.99.105:8766/)",
+      "PowerShell(code --install-extension Anthropic.claude-code)"
     ],
     "additionalDirectories": [
       "C:\\Users\\natha\\Documents\\ComNaKrub\\packages\\backend\\src"

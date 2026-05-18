@@ -98,3 +98,9 @@ Payment       id, setId, amount, method (cash/transfer), note, paidAt
 - `barcode` field เป็น `@unique` — ถ้า seed ข้อมูลซ้ำจะ error
 - Frontend dev ใช้ Vite proxy — production ใช้ Nginx proxy ใน `nginx.conf`
 - ใน Docker: backend ไม่ expose port ออก host ตรงๆ — ผ่าน frontend Nginx เท่านั้น
+
+## 📌 Memory & Documentation Rules (Strict)
+
+*   **Before Task:** อ่านไฟล์ใน .notes/ ของ sub-directory นั้นๆ ก่อนเริ่มงานเสมอ
+*   **After Task:** สรุปสิ่งที่ทำลงใน .notes/daily_log.md ทุกครั้งที่จบงาน
+*   **Every Session End:** อัปเดตข้อมูลที่เปลี่ยนไป (DB schema, API, settings, gaps) ใน .notes/00_INDEX.md ควบคู่กับ log เสมอ (ไม่มีข้อยกเว้น ไม่ต้องรอ structural change)

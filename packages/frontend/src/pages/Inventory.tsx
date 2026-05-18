@@ -1,489 +1,254 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Plus, Pencil, Trash2, Package, RefreshCw, X } from 'lucide-react'
-import { Part, Category, CATEGORIES, PartsResponse } from '@/types/part'
-import { cn, formatCurrency } from '@/lib/utils'
+import { useState, useEffect, useMemo } from 'react'
+import { Search, Pencil, Trash2, Package, RefreshCw } from 'lucide-react'
+import { Part, CATEGORIES } from '@/types/part'
+import { formatCurrency } from '@/lib/utils'
 
-const CATEGORY_COLORS: Record<Category, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
   CPU: 'bg-blue-100 text-blue-800',
   RAM: 'bg-green-100 text-green-800',
   VGA: 'bg-purple-100 text-purple-800',
-  MB: 'bg-orange-100 text-orange-800',
+  MAINBOARD: 'bg-orange-100 text-orange-800',
   PSU: 'bg-yellow-100 text-yellow-800',
-  CASE: 'bg-gray-100 text-gray-800',
   Monitor: 'bg-cyan-100 text-cyan-800',
   'M.2': 'bg-red-100 text-red-800',
   SSD: 'bg-pink-100 text-pink-800',
-  Cooler: 'bg-indigo-100 text-indigo-800',
-  FAN: 'bg-teal-100 text-teal-800',
-}
-
-const EMPTY_FORM = {
-  name: '',
-  category: 'CPU' as Category,
-  brand: '',
-  model: '',
-  quantity: 0,
-  costPrice: 0,
-  sellPrice: 0,
-  barcode: '',
-}
-
-type FormData = typeof EMPTY_FORM
-
-function PartDialog({
-  part,
-  onClose,
-  onSaved,
-}: {
-  part: Part | null
-  onClose: () => void
-  onSaved: () => void
-}) {
-  const [form, setForm] = useState<FormData>(
-    part
-      ? {
-          name: part.name,
-          category: part.category,
-          brand: part.brand,
-          model: part.model,
-          quantity: part.quantity,
-          costPrice: part.costPrice,
-          sellPrice: part.sellPrice,
-          barcode: part.barcode ?? '',
-        }
-      : EMPTY_FORM
-  )
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const set = (field: keyof FormData, value: string | number) =>
-    setForm(f => ({ ...f, [field]: value }))
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) { setError('กรุณากรอกชื่อสินค้า'); return }
-    setSaving(true)
-    setError(null)
-    try {
-      const body = {
-        ...form,
-        barcode: form.barcode.trim() || undefined,
-        quantity: Number(form.quantity),
-        costPrice: Number(form.costPrice),
-        sellPrice: Number(form.sellPrice),
-      }
-      const res = await fetch(part ? `/api/parts/${part.id}` : '/api/parts', {
-        method: part ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}))
-        const msg = typeof json.error === 'string' ? json.error : JSON.stringify(json.error) || 'บันทึกไม่สำเร็จ'
-        throw new Error(msg)
-      }
-      onSaved()
-      onClose()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div
-        className="bg-background rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h3 className="font-semibold text-lg">{part ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-accent rounded transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
-          {error && (
-            <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-md px-3 py-2 text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1">ชื่อสินค้า *</label>
-              <input
-                autoFocus
-                value={form.name}
-                onChange={e => set('name', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="เช่น Intel Core i5-13400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">หมวดหมู่ *</label>
-              <select
-                value={form.category}
-                onChange={e => set('category', e.target.value as Category)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              >
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">แบรนด์</label>
-              <input
-                value={form.brand}
-                onChange={e => set('brand', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="เช่น Intel, AMD, ASUS"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">รุ่น</label>
-              <input
-                value={form.model}
-                onChange={e => set('model', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="เช่น i5-13400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">จำนวนในคลัง</label>
-              <input
-                type="number"
-                min={0}
-                value={form.quantity}
-                onChange={e => set('quantity', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">ราคาทุน (บาท)</label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={form.costPrice}
-                onChange={e => set('costPrice', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">ราคาขาย (บาท)</label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={form.sellPrice}
-                onChange={e => set('sellPrice', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">บาร์โค้ด</label>
-              <input
-                value={form.barcode}
-                onChange={e => set('barcode', e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="ไม่บังคับ"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2 justify-end pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border rounded-md text-sm hover:bg-accent transition-colors"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {saving ? 'กำลังบันทึก...' : part ? 'บันทึก' : 'เพิ่มสินค้า'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
 }
 
 export default function InventoryPage() {
   const [parts, setParts] = useState<Part[]>([])
-  const [meta, setMeta] = useState({ total: 0, page: 1, limit: 50, totalPages: 1 })
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<Category | ''>('')
-  const [searchInput, setSearchInput] = useState('')
-  const [dialog, setDialog] = useState<{ open: boolean; part: Part | null }>({ open: false, part: null })
-
-  const fetchParts = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const params = new URLSearchParams()
-      if (search) params.set('search', search)
-      if (selectedCategory) params.set('category', selectedCategory)
-      params.set('page', String(meta.page))
-      params.set('limit', '50')
-
-      const res = await fetch(`/api/parts?${params}`)
-      if (!res.ok) throw new Error('Failed to fetch parts')
-      const json: PartsResponse = await res.json()
-      setParts(json.data)
-      setMeta(json.meta)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }, [search, selectedCategory, meta.page])
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
 
   useEffect(() => {
     fetchParts()
-  }, [fetchParts])
+  }, [])
 
-  const handleSearch = () => {
-    setSearch(searchInput)
-    setMeta(m => ({ ...m, page: 1 }))
+  const fetchParts = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch('/api/parts')
+      const json = await res.json()
+      setParts(json.data || [])
+    } catch (error) {
+      console.error('Error fetching parts:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleCategoryChange = (cat: Category | '') => {
-    setSelectedCategory(cat)
-    setMeta(m => ({ ...m, page: 1 }))
-  }
+  const filteredParts = useMemo(() => {
+    let filtered = parts
+
+    if (selectedCategory) {
+      filtered = filtered.filter(p => p.category === selectedCategory)
+    }
+
+    if (search) {
+      const searchLower = search.toLowerCase()
+      filtered = filtered.filter(
+        p =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.brand.toLowerCase().includes(searchLower) ||
+          p.model.toLowerCase().includes(searchLower)
+      )
+    }
+
+    return filtered
+  }, [parts, selectedCategory, search])
+
+  const stats = useMemo(() => {
+    const totalCost = filteredParts.reduce((sum, p) => sum + p.costPrice * p.quantity, 0)
+    const totalQty = filteredParts.reduce((sum, p) => sum + p.quantity, 0)
+    return { totalCost, totalQty, count: filteredParts.length }
+  }, [filteredParts])
 
   const handleDelete = async (id: number) => {
-    if (!confirm('ลบรายการนี้?')) return
-    await fetch(`/api/parts/${id}`, { method: 'DELETE' })
-    fetchParts()
+    if (!confirm('ต้องการลบรายการนี้หรือไม่?')) return
+    try {
+      await fetch(`/api/parts/${id}`, { method: 'DELETE' })
+      setParts(parts.filter(p => p.id !== id))
+    } catch (error) {
+      console.error('Error deleting part:', error)
+    }
   }
 
-  const lowStockCount = parts.filter(p => p.quantity <= 3).length
+  const getCategoryDisplay = (part: Part) => {
+    switch (part.category) {
+      case 'CPU':
+        return `${part.cpuSocket || ''} • ${part.cpuCodename || ''}`
+      case 'RAM':
+        return `${part.ramMemoryType || ''} • ${part.ramSize || ''}`
+      case 'M.2':
+        return `${part.m2Type || ''} • ${part.m2Capacity || ''}`
+      case 'SSD':
+        return `${part.ssdInterface || ''} • ${part.ssdCapacity || ''}`
+      case 'MAINBOARD':
+        return `${part.mbSocket || ''} • ${part.mbChipset || ''}`
+      case 'VGA':
+        return `${part.vgaSeries || ''} • ${part.vgaMemory || ''}GB`
+      case 'PSU':
+        return `${part.psuWatt || ''}W • ${part.psuCertification || ''}`
+      case 'Monitor':
+        return `${part.monitorSize || ''}\" • ${part.monitorRes || ''}@${part.monitorHz || ''}Hz`
+      default:
+        return part.model
+    }
+  }
 
   return (
-    <div className="space-y-4">
-      {dialog.open && (
-        <PartDialog
-          part={dialog.part}
-          onClose={() => setDialog({ open: false, part: null })}
-          onSaved={fetchParts}
-        />
-      )}
-
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Inventory</h2>
-          <p className="text-sm text-muted-foreground">
-            {meta.total} รายการ
-            {lowStockCount > 0 && (
-              <span className="ml-2 text-orange-600 font-medium">· {lowStockCount} ใกล้หมด</span>
-            )}
-          </p>
-        </div>
-        <button
-          onClick={() => setDialog({ open: true, part: null })}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={16} />
-          เพิ่มสินค้า
-        </button>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory</h1>
+        <p className="text-gray-600">
+          {stats.count} รายการ · {stats.totalQty} ชิ้น · {formatCurrency(stats.totalCost)} บาท
+        </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="flex gap-2 flex-1 min-w-64">
-          <input
-            type="text"
-            placeholder="ค้นหาชื่อ, แบรนด์, รุ่น, บาร์โค้ด..."
-            value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            className="flex-1 px-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
+      {/* Controls */}
+      <div className="bg-white rounded-lg shadow mb-6 p-4">
+        <div className="flex gap-4 mb-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="ค้นหาชิ้นส่วน..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
           <button
-            onClick={handleSearch}
-            className="px-3 py-2 border rounded-md hover:bg-accent transition-colors"
+            onClick={fetchParts}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 transition"
           >
-            <Search size={16} />
+            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            รีเฟรช
           </button>
         </div>
 
-        <div className="flex gap-1 flex-wrap">
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => handleCategoryChange('')}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors border',
-              selectedCategory === '' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent border-transparent'
-            )}
+            onClick={() => setSelectedCategory('')}
+            className={`px-3 py-1 rounded-full font-semibold transition ${
+              selectedCategory === ''
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            }`}
           >
             ทั้งหมด
           </button>
           {CATEGORIES.map(cat => (
             <button
               key={cat}
-              onClick={() => handleCategoryChange(cat)}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors border',
-                selectedCategory === cat ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent border-transparent'
-              )}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1 rounded-full font-semibold transition ${
+                selectedCategory === cat
+                  ? 'bg-blue-600 text-white'
+                  : CATEGORY_COLORS[cat]
+              }`}
             >
               {cat}
             </button>
           ))}
         </div>
-
-        <button
-          onClick={fetchParts}
-          className="px-3 py-2 border rounded-md hover:bg-accent transition-colors"
-          title="Refresh"
-        >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-        </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-md px-4 py-3 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 border-b">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">ชื่อสินค้า</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">หมวดหมู่</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">แบรนด์</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">คลัง</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">ราคาทุน</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">ราคาขาย</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">กำไร</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground w-20"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {loading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  {Array.from({ length: 8 }).map((_, j) => (
-                    <td key={j} className="px-4 py-3">
-                      <div className="h-4 bg-muted rounded" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : parts.length === 0 ? (
+      {/* Parts Table */}
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        {filteredParts.length === 0 ? (
+          <div className="p-12 text-center text-gray-500">
+            <Package size={48} className="mx-auto mb-4 opacity-50" />
+            <p className="text-lg">ไม่มีรายการชิ้นส่วน</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
-                  <Package size={32} className="mx-auto mb-2 opacity-30" />
-                  ไม่พบรายการสินค้า
-                </td>
+                <th className="px-4 py-3 text-left font-semibold text-gray-900">ID</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-900">ชิ้นส่วน</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-900">ประเภท</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-900">ยี่ห้อ</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-900">รายละเอียด</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-900">จำนวน</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-900">ราคาต้นทุน</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-900">ราคาขาย</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-900 w-20">การกระทำ</th>
               </tr>
-            ) : (
-              parts.map(part => {
-                const profit = part.sellPrice - part.costPrice
-                const profitPct = part.costPrice > 0 ? (profit / part.costPrice) * 100 : 0
-                const isLowStock = part.quantity <= 3
-
+            </thead>
+            <tbody className="divide-y">
+              {filteredParts.map(part => {
+                const displayText = getCategoryDisplay(part)
                 return (
-                  <tr key={part.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{part.name}</div>
-                      {part.barcode && (
-                        <div className="text-xs text-muted-foreground">{part.barcode}</div>
+                  <tr key={part.id} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3 text-gray-600 font-mono text-xs">{part.id}</td>
+                    <td className="px-4 py-3 text-gray-900 max-w-xs">
+                      <div className="font-medium truncate">{part.name}</div>
+                      {part.note && (
+                        <div className="text-xs text-gray-500 truncate">{part.note}</div>
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', CATEGORY_COLORS[part.category as Category])}>
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                          CATEGORY_COLORS[part.category] || 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {part.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{part.brand}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={cn('font-medium', isLowStock ? 'text-orange-600' : '')}>
-                        {part.quantity}
-                      </span>
-                      {isLowStock && part.quantity === 0 && (
-                        <span className="ml-1 text-xs text-red-500">หมด</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrency(part.costPrice)}</td>
-                    <td className="px-4 py-3 text-right font-medium">{formatCurrency(part.sellPrice)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <div className={cn('font-medium', profit >= 0 ? 'text-green-600' : 'text-red-500')}>
-                        {formatCurrency(profit)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{profitPct.toFixed(1)}%</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1 justify-end">
+                    <td className="px-4 py-3 text-gray-600">{part.brand}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{displayText}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-gray-900">{part.quantity}</td>
+                    <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(part.costPrice)}</td>
+                    <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(part.sellPrice)}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
                         <button
-                          onClick={() => setDialog({ open: true, part })}
-                          className="p-1.5 hover:bg-accent rounded transition-colors text-muted-foreground hover:text-foreground"
+                          onClick={() => window.location.href = `/parts/${part.id}/edit`}
+                          className="p-1.5 hover:bg-blue-100 rounded text-blue-600 transition"
                           title="แก้ไข"
                         >
-                          <Pencil size={14} />
+                          <Pencil size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(part.id)}
-                          className="p-1.5 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive"
+                          className="p-1.5 hover:bg-red-100 rounded text-red-600 transition"
                           title="ลบ"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
                   </tr>
                 )
-              })
-            )}
-          </tbody>
-        </table>
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {/* Pagination */}
-      {meta.totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            หน้า {meta.page} จาก {meta.totalPages} ({meta.total} รายการ)
-          </span>
-          <div className="flex gap-1">
-            <button
-              disabled={meta.page <= 1}
-              onClick={() => setMeta(m => ({ ...m, page: m.page - 1 }))}
-              className="px-3 py-1.5 border rounded-md disabled:opacity-50 hover:bg-accent transition-colors"
-            >
-              ก่อนหน้า
-            </button>
-            <button
-              disabled={meta.page >= meta.totalPages}
-              onClick={() => setMeta(m => ({ ...m, page: m.page + 1 }))}
-              className="px-3 py-1.5 border rounded-md disabled:opacity-50 hover:bg-accent transition-colors"
-            >
-              ถัดไป
-            </button>
-          </div>
+      {/* Stats */}
+      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-600 mb-1">รวมรายการ</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.count}</p>
         </div>
-      )}
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-600 mb-1">จำนวนรวม</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.totalQty}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-600 mb-1">มูลค่าต้นทุน</p>
+          <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalCost)}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-600 mb-1">หมวดหมู่</p>
+          <p className="text-2xl font-bold text-gray-900">{CATEGORIES.length}</p>
+        </div>
+      </div>
     </div>
   )
 }

@@ -74,26 +74,56 @@ export default function InventoryPage() {
   }
 
   const getCategoryDisplay = (part: Part) => {
+    const details: string[] = []
     switch (part.category) {
       case 'CPU':
-        return `${part.cpuSocket || ''} • ${part.cpuCodename || ''}`
+        if (part.cpuPackage) details.push(part.cpuPackage)
+        if (part.cpuSocket) details.push(part.cpuSocket)
+        if (part.cpuCodename) details.push(part.cpuCodename)
+        break
       case 'RAM':
-        return `${part.ramMemoryType || ''} • ${part.ramSize || ''}`
+        if (part.ramPackage) details.push(part.ramPackage)
+        if (part.ramMemoryType) details.push(part.ramMemoryType)
+        if (part.ramBus) details.push(`${part.ramBus}MHz`)
+        if (part.ramSize) details.push(part.ramSize)
+        break
       case 'M.2':
-        return `${part.m2Type || ''} • ${part.m2Capacity || ''}`
+        if (part.m2Package) details.push(part.m2Package)
+        if (part.m2Type) details.push(part.m2Type)
+        if (part.m2Interface) details.push(part.m2Interface)
+        if (part.m2Capacity) details.push(part.m2Capacity)
+        break
       case 'SSD':
-        return `${part.ssdInterface || ''} • ${part.ssdCapacity || ''}`
+        if (part.ssdPackage) details.push(part.ssdPackage)
+        if (part.ssdInterface) details.push(part.ssdInterface)
+        if (part.ssdCapacity) details.push(part.ssdCapacity)
+        break
       case 'MAINBOARD':
-        return `${part.mbSocket || ''} • ${part.mbChipset || ''}`
+        if (part.mbSize) details.push(part.mbSize)
+        if (part.mbSocket) details.push(part.mbSocket)
+        if (part.mbChipset) details.push(part.mbChipset)
+        if (part.mbSlotRam) details.push(`${part.mbSlotRam}x`)
+        break
       case 'VGA':
-        return `${part.vgaSeries || ''} • ${part.vgaMemory || ''}GB`
+        if (part.vgaChipset) details.push(part.vgaChipset)
+        if (part.vgaSeries) details.push(part.vgaSeries)
+        if (part.vgaGpuModel) details.push(part.vgaGpuModel)
+        if (part.vgaMemory) details.push(`${part.vgaMemory}GB`)
+        break
       case 'PSU':
-        return `${part.psuWatt || ''}W • ${part.psuCertification || ''}`
+        if (part.psuWatt) details.push(`${part.psuWatt}W`)
+        if (part.psuCertification) details.push(part.psuCertification)
+        break
       case 'Monitor':
-        return `${part.monitorSize || ''}\" • ${part.monitorRes || ''}@${part.monitorHz || ''}Hz`
+        if (part.monitorSize) details.push(`${part.monitorSize}"`)
+        if (part.monitorPanel) details.push(part.monitorPanel)
+        if (part.monitorRes) details.push(part.monitorRes)
+        if (part.monitorHz) details.push(`${part.monitorHz}Hz`)
+        break
       default:
-        return part.model
+        if (part.model) details.push(part.model)
     }
+    return details.join(' • ') || part.model
   }
 
   return (

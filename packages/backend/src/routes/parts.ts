@@ -5,7 +5,7 @@ import { z } from 'zod'
 const router = Router()
 const prisma = new PrismaClient()
 
-const CATEGORIES = ['CPU', 'RAM', 'VGA', 'MB', 'PSU', 'CASE', 'Monitor', 'M.2', 'SSD', 'Cooler', 'FAN'] as const
+const CATEGORIES = ['CPU', 'RAM', 'M.2', 'SSD', 'MAINBOARD', 'VGA', 'PSU', 'Monitor'] as const
 
 const PartCreateSchema = z.object({
   name: z.string().min(1),

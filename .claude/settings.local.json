@@ -39,7 +39,17 @@
       "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker cp /tmp/seed.ts comnakrub-backend:/app/prisma/seed.ts && rm /tmp/seed.ts\")",
       "Bash(curl -s \"http://192.168.99.105:8766/api/parts?limit=5\")",
       "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose -f /share/Container/comnakrub/docker-compose.yml ps\")",
-      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker ps | grep comnakrub\")"
+      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker ps | grep comnakrub\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"docker ps -a\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"ls -la /share/Container/comnakrub/\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker volume ls\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker logs comnakrub-backend --tail 50\")",
+      "Bash(curl -s http://192.168.99.105:8766/api/parts)",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend npm run db:seed\")",
+      "Bash(curl -s 'http://192.168.99.105:8766/api/parts')",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend ls -lh /data/prod.db && echo '---' && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend wc -l /data/prod.db\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend ls -la /data/\")",
+      "Bash(ssh -p 22 na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend rm /data/prod.db && npm run db:seed\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\natha\\Documents\\ComNaKrub\\packages\\backend\\src"

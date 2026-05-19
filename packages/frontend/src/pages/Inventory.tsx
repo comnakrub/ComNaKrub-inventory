@@ -27,7 +27,7 @@ export default function InventoryPage() {
   const fetchParts = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/parts')
+      const res = await fetch('/api/parts?limit=200')
       const json = await res.json()
       setParts(json.data || [])
     } catch (error) {

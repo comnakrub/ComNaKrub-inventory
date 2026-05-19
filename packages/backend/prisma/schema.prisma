@@ -11,7 +11,7 @@ datasource db {
 model Part {
   id        Int      @id @default(autoincrement())
   name      String
-  category  String
+  category  String   // CPU, RAM, M.2, SSD, MAINBOARD, VGA, PSU, Monitor
   brand     String   @default("")
   model     String   @default("")
   quantity  Int      @default(0)
@@ -19,6 +19,57 @@ model Part {
   sellPrice Float    @default(0)
   barcode   String?  @unique
   imageUrl  String?
+  note      String   @default("")
+
+  // CPU fields
+  cpuPackage    String?  // Box, Tray
+  cpuSocket     String?  // AM4, 1200, 1700
+  cpuCodename   String?
+
+  // RAM fields
+  ramColor      String?  // Black, White, Gray
+  ramRgb        Boolean  @default(false)
+  ramPackage    String?  // Box, Tray
+  ramMemoryType String?  // DDR4, DDR5
+  ramBus        Int?     // 3200, 5600 (MHz)
+  ramSize       String?  // 8GB, 16GB, 32GB, 48GB
+
+  // M.2 fields
+  m2Package     String?  // Box, Tray
+  m2Type        String?  // NVME, SATA
+  m2Interface   String?  // PCIe 4.0, PCIe 3.0, SATA
+  m2Capacity    String?  // 256GB, 512GB, 1TB, 2TB
+
+  // SSD fields
+  ssdPackage    String?  // Box, Tray
+  ssdInterface  String?  // SATA-III
+  ssdCapacity   String?  // 240GB, 256GB, 480GB, 512GB, 1TB
+
+  // MAINBOARD fields
+  mbSize        String?  // MICRO-ATX, ATX
+  mbSocket      String?  // AM4, 1200, 1700
+  mbChipset     String?  // B550M, B560M, H470, H570
+  mbSlotRam     Int?     // 2, 4
+  mbSupportRam  String?  // DDR4, DDR5
+
+  // VGA fields
+  vgaChipset    String?  // Nvidia, AMD
+  vgaFan        Int?     // 2, 3, 4 (fan count)
+  vgaSeries     String?  // GeForce 50 Series, GeForce 40 Series
+  vgaGpuModel   String?  // 5070, 4060, 3080 TI
+  vgaMemory     Float?   // 6, 8, 12, 24 (GB)
+
+  // PSU fields
+  psuCertification String? // 80 PLUS Gold, 80 PLUS Bronze, 80 PLUS White
+  psuWatt       Int?     // 650, 750, 850, 1650
+
+  // Monitor fields
+  monitorSize   Int?     // 22, 24, 25, 27 (inches)
+  monitorColor  String?  // Black, White
+  monitorPanel  String?  // IPS, VA, TN
+  monitorRes    String?  // FHD, 1440p, 4K
+  monitorHz     Int?     // 60, 120, 144, 165, 180 (Hz)
+
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

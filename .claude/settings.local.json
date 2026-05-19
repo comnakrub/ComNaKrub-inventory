@@ -29,7 +29,17 @@
       "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && APP_PORT=8765 /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose up -d && sleep 2 && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose ps\")",
       "Bash(curl -s http://192.168.99.105:8766/api/health)",
       "Bash(curl -s http://192.168.99.105:8766/)",
-      "PowerShell(code --install-extension Anthropic.claude-code)"
+      "PowerShell(code --install-extension Anthropic.claude-code)",
+      "Bash(git stash *)",
+      "Bash(curl -s -I http://192.168.99.105:8766/)",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && docker exec comnakrub-backend sh -c 'cd /app && npm run db:generate'\")",
+      "Bash(ssh na@192.168.99.105 \"cd /share/Container/comnakrub && /share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend sh -c 'cd /app && npm run db:migrate'\")",
+      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker exec comnakrub-backend sh -c 'cd /app && npm run db:seed'\")",
+      "Bash(scp -O -P 22 packages/backend/prisma/seed.ts na@192.168.99.105:/tmp/seed.ts)",
+      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker cp /tmp/seed.ts comnakrub-backend:/app/prisma/seed.ts && rm /tmp/seed.ts\")",
+      "Bash(curl -s \"http://192.168.99.105:8766/api/parts?limit=5\")",
+      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker compose -f /share/Container/comnakrub/docker-compose.yml ps\")",
+      "Bash(ssh na@192.168.99.105 \"/share/CACHEDEV1_DATA/.qpkg/container-station/usr/bin/.libs/docker ps | grep comnakrub\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\natha\\Documents\\ComNaKrub\\packages\\backend\\src"

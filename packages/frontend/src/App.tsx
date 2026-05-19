@@ -1,6 +1,7 @@
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { Package, ShoppingCart, BarChart3 } from 'lucide-react'
 import InventoryPage from '@/pages/Inventory'
+import EditPartPage from '@/pages/EditPart'
 import CustomerSetsPage from '@/pages/CustomerSets'
 
 export default function App() {
@@ -73,6 +74,7 @@ export default function App() {
       <main className="container mx-auto px-4 py-6">
         <Routes>
           <Route path="/" element={<InventoryPage />} />
+          <Route path="/parts/:id/edit" element={<EditPartPage />} />
           <Route path="/sets" element={<CustomerSetsPage />} />
           <Route path="/reports" element={<div className="text-muted-foreground">Reports — coming soon</div>} />
         </Routes>

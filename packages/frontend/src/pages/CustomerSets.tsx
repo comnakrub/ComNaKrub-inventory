@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, X, Search, Trash2, ChevronRight } from 'lucide-react'
-import { Part, CATEGORIES } from '@/types/part'
+import { Part } from '@/types/part'
 import { cn, formatCurrency } from '@/lib/utils'
 
 type SetStatus = 'draft' | 'deposited' | 'contracted' | 'paid' | 'cancelled'
@@ -63,19 +63,17 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<DraftItem[]>([])
   const [partSearch, setPartSearch] = useState('')
-  const [filterCat, setFilterCat] = useState('')
   const [searchResults, setSearchResults] = useState<Part[]>([])
   const [searching, setSearching] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const searchParts = useCallback(async (query: string, cat: string) => {
-    if (!query.trim() && !cat) { setSearchResults([]); return }
+  const searchParts = useCallback(async (query: string) => {
+    if (!query.trim()) { setSearchResults([]); return }
     setSearching(true)
     try {
       const params = new URLSearchParams({ limit: '20' })
       if (query.trim()) params.set('search', query)
-      if (cat) params.set('category', cat)
       const res = await fetch(`/api/parts?${params}`)
       const json = await res.json()
       setSearchResults(json.data ?? [])
@@ -85,9 +83,9 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
   }, [])
 
   useEffect(() => {
-    const t = setTimeout(() => searchParts(partSearch, filterCat), 300)
+    const t = setTimeout(() => searchParts(partSearch), 300)
     return () => clearTimeout(t)
-  }, [partSearch, filterCat, searchParts])
+  }, [partSearch, searchParts])
 
   const addPart = (part: Part) => {
     setItems(prev => {
@@ -96,7 +94,6 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
       return [...prev, { partId: part.id, quantity: 1, unitPrice: part.costPrice, part }]
     })
     setPartSearch('')
-    setFilterCat('')
     setSearchResults([])
   }
 
@@ -177,15 +174,6 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
 
           <div>
             <label className="block text-sm font-medium mb-1">เพิ่มสินค้า</label>
-            <div className="flex flex-wrap gap-1 mb-2">
-              {CATEGORIES.map(cat => (
-                <button key={cat} type="button" onClick={() => setFilterCat(f => f === cat ? '' : cat)}
-                  className={cn('px-2.5 py-1 rounded-md text-xs font-medium border transition-colors',
-                    filterCat === cat ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent border-transparent bg-muted/50')}>
-                  {cat}
-                </button>
-              ))}
-            </div>
             <div className="relative">
               <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-background">
                 <Search size={14} className="text-muted-foreground shrink-0" />
@@ -193,7 +181,7 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
                   className="flex-1 text-sm bg-transparent outline-none"
                   placeholder="ค้นหาชื่อสินค้า, แบรนด์, รุ่น..." />
               </div>
-              {(searchResults.length > 0 || (searching && (partSearch || filterCat))) && (
+              {(searchResults.length > 0 || (searching && partSearch)) && (
                 <div className="absolute top-full left-0 right-0 z-20 bg-background border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
                   {searching && <div className="px-3 py-2 text-sm text-muted-foreground">กำลังค้นหา...</div>}
                   {searchResults.map(part => (
@@ -202,7 +190,6 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
                       <div className="min-w-0">
                         <span className="font-medium">{part.name}</span>
                         {part.brand && <span className="text-muted-foreground ml-1">{part.brand}</span>}
-                        <span className="text-xs text-muted-foreground ml-1">({part.category})</span>
                       </div>
                       <span className="text-muted-foreground shrink-0">{formatCurrency(part.costPrice)}</span>
                     </button>
@@ -229,7 +216,7 @@ function CreateSetDialog({ onClose, onSaved }: { onClose: () => void; onSaved: (
                     <tr key={item.partId}>
                       <td className="px-3 py-2">
                         <div className="font-medium">{item.part.name}</div>
-                        {item.part.brand && <div className="text-xs text-muted-foreground">{item.part.brand} · {item.part.category}</div>}
+                        {item.part.brand && <div className="text-xs text-muted-foreground">{item.part.brand}</div>}
                       </td>
                       <td className="px-3 py-2">
                         <input type="number" min={1} value={item.quantity}
@@ -296,19 +283,17 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
     set.items.map(i => ({ partId: i.partId, quantity: i.quantity, unitPrice: i.unitPrice, part: i.part }))
   )
   const [partSearch, setPartSearch] = useState('')
-  const [filterCat, setFilterCat] = useState('')
   const [searchResults, setSearchResults] = useState<Part[]>([])
   const [searching, setSearching] = useState(false)
   const [savingEdit, setSavingEdit] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
-  const searchParts = useCallback(async (query: string, cat: string) => {
-    if (!query.trim() && !cat) { setSearchResults([]); return }
+  const searchParts = useCallback(async (query: string) => {
+    if (!query.trim()) { setSearchResults([]); return }
     setSearching(true)
     try {
       const params = new URLSearchParams({ limit: '20' })
       if (query.trim()) params.set('search', query)
-      if (cat) params.set('category', cat)
       const res = await fetch(`/api/parts?${params}`)
       const json = await res.json()
       setSearchResults(json.data ?? [])
@@ -318,9 +303,9 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
   }, [])
 
   useEffect(() => {
-    const t = setTimeout(() => searchParts(partSearch, filterCat), 300)
+    const t = setTimeout(() => searchParts(partSearch), 300)
     return () => clearTimeout(t)
-  }, [partSearch, filterCat, searchParts])
+  }, [partSearch, searchParts])
 
   const addDraftPart = (part: Part) => {
     setDraftItems(prev => {
@@ -328,7 +313,7 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
       if (existing) return prev.map(i => i.partId === part.id ? { ...i, quantity: i.quantity + 1 } : i)
       return [...prev, { partId: part.id, quantity: 1, unitPrice: part.costPrice, part }]
     })
-    setPartSearch(''); setFilterCat(''); setSearchResults([])
+    setPartSearch(''); setSearchResults([])
   }
 
   const removeDraftItem = (partId: number) => setDraftItems(prev => prev.filter(i => i.partId !== partId))
@@ -478,15 +463,6 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
             {/* Category filter */}
             <div>
               <label className="block text-xs font-medium mb-1">เพิ่มสินค้า</label>
-              <div className="flex flex-wrap gap-1 mb-2">
-                {CATEGORIES.map(cat => (
-                  <button key={cat} type="button" onClick={() => setFilterCat(f => f === cat ? '' : cat)}
-                    className={cn('px-2 py-0.5 rounded text-xs font-medium border transition-colors',
-                      filterCat === cat ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent border-transparent bg-muted/50')}>
-                    {cat}
-                  </button>
-                ))}
-              </div>
               <div className="relative">
                 <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-background">
                   <Search size={13} className="text-muted-foreground shrink-0" />
@@ -494,7 +470,7 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
                     className="flex-1 text-sm bg-transparent outline-none"
                     placeholder="ค้นหาสินค้า..." />
                 </div>
-                {(searchResults.length > 0 || (searching && (partSearch || filterCat))) && (
+                {(searchResults.length > 0 || (searching && partSearch)) && (
                   <div className="absolute top-full left-0 right-0 z-20 bg-background border rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
                     {searching && <div className="px-3 py-2 text-sm text-muted-foreground">กำลังค้นหา...</div>}
                     {searchResults.map(part => (
@@ -527,7 +503,7 @@ function SetDetailDialog({ set, onClose, onUpdated }: { set: CustomerSet; onClos
                       <tr key={item.partId}>
                         <td className="px-3 py-2">
                           <div className="font-medium">{item.part.name}</div>
-                          {item.part.brand && <div className="text-xs text-muted-foreground">{item.part.brand} · {item.part.category}</div>}
+                          {item.part.brand && <div className="text-xs text-muted-foreground">{item.part.brand}</div>}
                         </td>
                         <td className="px-3 py-2">
                           <input type="number" min={1} value={item.quantity}

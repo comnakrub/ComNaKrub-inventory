@@ -28,6 +28,7 @@ const seedParts = [
   { category: 'CPU', name: 'CPU AMD AM4 RYZEN 5 5600X', brand: 'AMD', model: 'Ryzen 5', quantity: 0, costPrice: 0, sellPrice: 0, note: '', cpuPackage: 'Box', cpuSocket: 'AM4', cpuCodename: '5000 Series' },
   { category: 'CPU', name: 'CPU INTEL CORE I7-12700', brand: 'INTEL', model: 'CORE I7', quantity: 0, costPrice: 0, sellPrice: 0, note: '', cpuPackage: 'Tray', cpuSocket: '1700', cpuCodename: 'Intel Core Gen 12th' },
   { category: 'CPU', name: 'CPU INTEL CORE I9-13900K', brand: 'INTEL', model: 'CORE I9', quantity: 0, costPrice: 0, sellPrice: 0, note: '', cpuPackage: 'Box', cpuSocket: '1700', cpuCodename: 'Intel Core Gen 13th' },
+  { category: 'CPU', name: 'CPU INTEL CORE ULTRA 7 270K Plus', brand: 'INTEL', model: 'CORE ULTRA 7', quantity: 1, costPrice: 10000, sellPrice: 0, note: '', cpuPackage: 'Box', cpuSocket: '1851', cpuCodename: 'Intel Core Ultra' },
 
   // RAM - 24 items
   { category: 'RAM', name: 'G.SKILLTrident Z5 RGB DDR5 7200MHz 48GB (2x24GB)', brand: 'G.SKILL', model: 'Trident Z5', quantity: 1, costPrice: 10000, sellPrice: 0, note: '', ramColor: 'Black', ramRgb: true, ramPackage: 'Box', ramMemoryType: 'DDR5', ramBus: 7200, ramSize: '48GB' },

@@ -5,11 +5,8 @@ import { z } from 'zod'
 const router = Router()
 const prisma = new PrismaClient()
 
-const CATEGORIES = ['CPU', 'RAM', 'M.2', 'SSD', 'MAINBOARD', 'VGA', 'PSU', 'Monitor'] as const
-
 const PartCreateSchema = z.object({
   name: z.string().min(1),
-  category: z.enum(CATEGORIES),
   brand: z.string().default(''),
   model: z.string().default(''),
   quantity: z.number().int().min(0).default(0),
@@ -24,13 +21,9 @@ const PartUpdateSchema = PartCreateSchema.partial()
 // GET /api/parts
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { category, search, page = '1', limit = '50' } = req.query
+    const { search, page = '1', limit = '50' } = req.query
 
     const where: Record<string, unknown> = { isActive: true }
-
-    if (category && typeof category === 'string') {
-      where.category = category
-    }
 
     if (search && typeof search === 'string') {
       where.OR = [
@@ -48,7 +41,7 @@ router.get('/', async (req: Request, res: Response) => {
     const [parts, total] = await Promise.all([
       prisma.part.findMany({
         where,
-        orderBy: [{ category: 'asc' }, { name: 'asc' }],
+        orderBy: { name: 'asc' },
         skip,
         take: limitNum,
       }),
@@ -117,6 +110,19 @@ router.delete('/:id', async (req: Request, res: Response) => {
       data: { isActive: false },
     })
     res.status(204).send()
+  } catch {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/parts/:id/restore (recover soft deleted item)
+router.post('/:id/restore', async (req: Request, res: Response) => {
+  try {
+    const part = await prisma.part.update({
+      where: { id: parseInt(req.params.id, 10) },
+      data: { isActive: true },
+    })
+    res.json(part)
   } catch {
     res.status(500).json({ error: 'Internal server error' })
   }

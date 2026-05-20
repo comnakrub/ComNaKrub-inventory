@@ -1,8 +1,12 @@
 export interface Part {
   id: number
   name: string
+  category: string
   brand: string
   model: string
+  package: string
+  socket: string
+  codename: string
   quantity: number
   costPrice: number
   sellPrice: number

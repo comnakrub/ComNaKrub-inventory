@@ -11,8 +11,12 @@ datasource db {
 model Part {
   id        Int      @id @default(autoincrement())
   name      String
+  category  String   @default("")
   brand     String   @default("")
   model     String   @default("")
+  package   String   @default("")
+  socket    String   @default("")
+  codename  String   @default("")
   quantity  Int      @default(0)
   costPrice Float    @default(0)
   sellPrice Float    @default(0)

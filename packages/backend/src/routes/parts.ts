@@ -7,8 +7,12 @@ const prisma = new PrismaClient()
 
 const PartCreateSchema = z.object({
   name: z.string().min(1),
+  category: z.string().default(''),
   brand: z.string().default(''),
   model: z.string().default(''),
+  package: z.string().default(''),
+  socket: z.string().default(''),
+  codename: z.string().default(''),
   quantity: z.number().int().min(0).default(0),
   costPrice: z.number().min(0).default(0),
   sellPrice: z.number().min(0).default(0),
